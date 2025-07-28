@@ -5,18 +5,18 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.petservice.model.MainViewModel
-import com.example.petservice.ui.theme.HomePage
-import com.example.petservice.ui.theme.ListPage
-import com.example.petservice.ui.theme.MapPage
+import com.example.petservice.ui.Page.HomePage
+import com.example.petservice.ui.Page.ListPage
+import com.example.petservice.ui.Page.MapPage
 
 @Composable
 fun MainNavHost(
     navController: NavHostController,
-    viewModel: MainViewModel
+
 ) {
     NavHost(navController, startDestination = Route.Home) {
-        composable<Route.Home> { HomePage(viewModel = viewModel) }
-        composable<Route.List> { ListPage(viewModel = viewModel) }
-        composable<Route.Map> { MapPage(viewModel = viewModel) }
+        composable<Route.Home> { HomePage(viewModel = MainViewModel()) }
+        composable<Route.List> { ListPage(viewModel = MainViewModel()) }
+        composable<Route.Map>  { MapPage (viewModel = MainViewModel()) }
     }
 }

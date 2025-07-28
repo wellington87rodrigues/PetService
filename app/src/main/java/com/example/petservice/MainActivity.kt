@@ -8,7 +8,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -29,8 +28,8 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.NavDestination.Companion.hasRoute
-import com.example.petservice.ui.theme.CityDialog
 import com.example.petservice.model.MainViewModel
+import com.example.petservice.ui.ServiceDialog
 import com.example.petservice.ui.nav.BottomNavBar
 import com.example.petservice.ui.nav.BottomNavItem
 import com.example.petservice.ui.nav.MainNavHost
@@ -44,19 +43,17 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-
-            var showDialog by remember { mutableStateOf(false) }
-            val viewModel : MainViewModel by viewModels()
             val navController = rememberNavController()
-            val currentRouter = navController.currentBackStackEntryAsState()
-            val showButton = currentRouter.value?.destination?.hasRoute(Route.List::class) == true
+            val viewModel : MainViewModel by viewModels()
+            var showDialog by remember { mutableStateOf(false) }
+            val currentRoute = navController.currentBackStackEntryAsState()
+            val showButton = currentRoute.value?.destination?.hasRoute(Route.List::class) == true
             val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission(), onResult = {} )
-
             PetServiceTheme {
-                if (showDialog) CityDialog(
+                if(showDialog) ServiceDialog (
                     onDismiss = { showDialog = false },
-                    onConfirm = { city ->
-                        if (city.isNotBlank()) viewModel.add(city)
+                    onConfirm = { service ->
+                        if(service.isNotBlank()) viewModel.add(service)
                         showDialog = false
                     })
                 Scaffold(
@@ -64,7 +61,7 @@ class MainActivity : ComponentActivity() {
                         TopAppBar(
                             title = { Text("Bem-vindo/a!") },
                             actions = {
-                                IconButton( onClick = { finish() } ) {
+                                IconButton(onClick = { finish() }) {
                                     Icon(
                                         imageVector =
                                             Icons.AutoMirrored.Filled.ExitToApp,
@@ -84,7 +81,7 @@ class MainActivity : ComponentActivity() {
                     },
                     floatingActionButton = {
                         if(showButton){
-                            FloatingActionButton(onClick = { showDialog = true }) {
+                            FloatingActionButton(onClick = { showDialog = true } ) {
                                 Icon(Icons.Default.Add, contentDescription = "Adicionar")
                             }
                         }
@@ -94,7 +91,7 @@ class MainActivity : ComponentActivity() {
                         launcher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
                         MainNavHost(
                             navController = navController,
-                            viewModel = viewModel
+                            //viewModel = viewModel
                         )
                     }
                 }

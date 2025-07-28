@@ -1,4 +1,4 @@
-package com.example.petservice.ui.theme
+package com.example.petservice.ui.Page
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -25,40 +25,39 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.petservice.model.Animal
 import com.example.petservice.model.MainViewModel
+import com.example.petservice.model.Service
 
-@SuppressLint("RememberReturnType", "ContextCastToActivity")
+@SuppressLint("ContextCastToActivity")
 @Composable
 fun ListPage(modifier: Modifier = Modifier,
-             viewModel: MainViewModel
-) {
-    val cityList = viewModel.cities
+             viewModel: MainViewModel) {
+    val serviceList = viewModel.servicies
     val activity = LocalContext.current as? Activity
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
             .padding(8.dp)
     ) {
-        items(cityList, key = { it.name }) { city ->
-            CityItem(city = city, onClose = {
-                viewModel.remove(city)
-                Toast.makeText(activity, "Cidade Excluida", Toast.LENGTH_LONG).show()
+        items(serviceList, key = { it.descriptor}) { service ->
+            ServiceItem(service = service, onClose = {
+                viewModel.remove(service)
+                Toast.makeText(activity, "Serviço Excluido!", Toast.LENGTH_LONG).show()
             }, onClick = {
-                Toast.makeText(activity, "Cidade Clicada", Toast.LENGTH_LONG).show()
+                Toast.makeText(activity, "Serviço Selecionado", Toast.LENGTH_LONG).show()
             })
         }
     }
 }
 
 @Composable
-fun CityItem(
-    city: Animal,
+fun ServiceItem(
+    service: Service,
     onClick: () -> Unit,
     onClose: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Row(
+    Row (
         modifier = modifier.fillMaxWidth().padding(8.dp).clickable { onClick() },
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -69,10 +68,10 @@ fun CityItem(
         Spacer(modifier = Modifier.size(12.dp))
         Column(modifier = modifier.weight(1f)) {
             Text(modifier = Modifier,
-                text = city.name,
+                text = service.descriptor,
                 fontSize = 24.sp)
             Text(modifier = Modifier,
-                text = city.weather?:"Carregando clima...",
+                text = service.photo?:"Carregando Foto...",
                 fontSize = 16.sp)
         }
         IconButton(onClick = onClose) {
