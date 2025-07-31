@@ -12,11 +12,12 @@ import com.example.petservice.ui.Page.MapPage
 @Composable
 fun MainNavHost(
     navController: NavHostController,
-
+    viewModel: MainViewModel
 ) {
+
     NavHost(navController, startDestination = Route.Home) {
-        composable<Route.Home> { HomePage(viewModel = MainViewModel()) }
-        composable<Route.List> { ListPage(viewModel = MainViewModel()) }
-        composable<Route.Map>  { MapPage (viewModel = MainViewModel()) }
+        composable<Route.Home> { HomePage(viewModel = viewModel) }
+        composable<Route.List> { ListPage(viewModel = viewModel) }
+        composable<Route.Map> { MapPage(viewModel = viewModel) }
     }
 }

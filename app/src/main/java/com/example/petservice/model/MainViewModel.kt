@@ -3,22 +3,30 @@ package com.example.petservice.model
 import androidx.compose.runtime.toMutableStateList
 import androidx.lifecycle.ViewModel
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.libraries.mapsplatform.transportation.consumer.model.Location
 
 class MainViewModel : ViewModel() {
-    private val _servicies = getServicies().toMutableStateList()
-    val servicies
-        get() = _servicies.toList()
+
+    private val _services = getServices().toMutableStateList()
+    val services
+        get() = _services.toList()
 
     fun remove(service: Service) {
-        _servicies.remove(service)
+        _services.remove(service)
     }
 
-    fun add(descriptor: String, location: LatLng? = null) {
-        _servicies.add(Service(descriptor = descriptor, location = location))
+    fun add(descricao: String, serviceType: String, location: LatLng?) {
+        val validServiceTypes = listOf("Adoção", "Resgate")
+        if (serviceType in validServiceTypes) {
+            _services.add(Service(descricao = descricao, serviceTypes = listOf(serviceType), location = location))
+        }
     }
 }
 
-private fun getServicies() = List(6) { i ->
-    Service(descriptor = "Descrição $i", photo = "Carregando Photo...")
+private fun getServices() = List(2) { i ->
+    val serviceTypes = if (i % 2 == 0) listOf("Adoção") else listOf("Resgate")
+    Service(
+        descricao = "Serviço de Pet ${i+1}",
+        serviceTypes = serviceTypes,
+        location = null
+    )
 }

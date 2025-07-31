@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -30,22 +31,29 @@ import com.example.petservice.model.Service
 
 @SuppressLint("ContextCastToActivity")
 @Composable
-fun ListPage(modifier: Modifier = Modifier,
-             viewModel: MainViewModel) {
-    val serviceList = viewModel.servicies
+fun ListPage(
+    modifier: Modifier = Modifier,
+    viewModel: MainViewModel
+) {
+    val serviceList = viewModel.services
     val activity = LocalContext.current as? Activity
+
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
             .padding(8.dp)
     ) {
-        items(serviceList, key = { it.descriptor}) { service ->
-            ServiceItem(service = service, onClose = {
-                viewModel.remove(service)
-                Toast.makeText(activity, "Serviço Excluido!", Toast.LENGTH_LONG).show()
-            }, onClick = {
-                Toast.makeText(activity, "Serviço Selecionado", Toast.LENGTH_LONG).show()
-            })
+        items(serviceList, key = { it.descricao }) { service ->
+            ServiceItem(
+                service = service,
+                onClose = {
+                    viewModel.remove(service)
+                    Toast.makeText(activity, "Serviço Excluído!", Toast.LENGTH_LONG).show()
+                },
+                onClick = {
+                    Toast.makeText(activity, "Serviço Selecionado!", Toast.LENGTH_LONG).show()
+                }
+            )
         }
     }
 }
@@ -57,8 +65,11 @@ fun ServiceItem(
     onClose: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Row (
-        modifier = modifier.fillMaxWidth().padding(8.dp).clickable { onClick() },
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+            .clickable { onClick() },
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
@@ -67,12 +78,25 @@ fun ServiceItem(
         )
         Spacer(modifier = Modifier.size(12.dp))
         Column(modifier = modifier.weight(1f)) {
-            Text(modifier = Modifier,
-                text = service.descriptor,
-                fontSize = 24.sp)
-            Text(modifier = Modifier,
-                text = service.photo?:"Carregando Foto...",
-                fontSize = 16.sp)
+            Text(
+                modifier = Modifier,
+                text = "Tipo: ${service.serviceTypes.joinToString(" / ")}",
+                fontSize = 24.sp
+            )
+            Text(
+                modifier = Modifier,
+                text = service.descricao,
+                fontSize = 20.sp,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+            )
+            if (service.location != null) {
+                Text(
+                    modifier = Modifier,
+                    text = "Localização: ${service.location.latitude}:${service.location.longitude}",
+                    fontSize = 16.sp,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
+            }
         }
         IconButton(onClick = onClose) {
             Icon(Icons.Filled.Close, contentDescription = "Close")

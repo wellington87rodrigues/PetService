@@ -4,7 +4,8 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("org.jetbrains.kotlin.plugin.serialization") version "1.9.0"
-    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin") /*version "2.0.1" apply false*/
+    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+    alias(libs.plugins.google.gms.google.services)
 }
 
 android {
@@ -44,10 +45,6 @@ android {
 
 dependencies {
 
-    implementation ("androidx.camera:camera-camera2:1.3.1")
-    implementation ("androidx.camera:camera-lifecycle:1.3.1")
-    implementation ("androidx.camera:camera-view:1.3.1")
-
     // Google maps
     implementation("com.google.android.gms:play-services-maps:19.2.0")
     implementation("com.google.android.gms:play-services-location:21.3.0")
@@ -67,6 +64,8 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.transportation.consumer)
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

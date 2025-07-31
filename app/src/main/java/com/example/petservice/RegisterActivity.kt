@@ -29,6 +29,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.petservice.ui.theme.PetServiceTheme
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 
 class RegisterActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,6 +45,7 @@ class RegisterActivity : ComponentActivity() {
         }
     }
 }
+
 @SuppressLint("ContextCastToActivity")
 @Composable
 fun RegisterPage(modifier: Modifier = Modifier) {
@@ -89,12 +92,19 @@ fun RegisterPage(modifier: Modifier = Modifier) {
         Row(modifier = modifier) {
             Button(
                 onClick = {
+                    Firebase.auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener (activity!!){ task ->
+                        if (task.isSuccessful){
+                            Toast.makeText(activity, "Registro Ok!", Toast.LENGTH_LONG).show()
+                        } else {
+                            Toast.makeText(activity, "Registro Falhou!", Toast.LENGTH_LONG).show()
+                        }
+                    }
                     activity?.finish()
-                    Toast.makeText(activity, "Registro Ok!", Toast.LENGTH_LONG).show()
+
                 },
                 enabled = name.isNotEmpty() && email.isNotEmpty() && password.isNotEmpty() && confirm.isNotEmpty() && password.equals(confirm)
             ) {
-                Text("Login")
+                Text("Registrar")
             }
             Button(
                 onClick = { email = ""; password = "" }
