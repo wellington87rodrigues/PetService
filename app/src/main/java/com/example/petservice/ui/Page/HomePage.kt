@@ -20,9 +20,7 @@ import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 
 @Composable
-fun HomePage(modifier: Modifier = Modifier,
-             viewModel: MainViewModel
-) {
+fun HomePage( viewModel: MainViewModel) {
     val camPosState = rememberCameraPositionState()
     val context = LocalContext.current
     val hasLocationPermission by remember {
@@ -34,7 +32,7 @@ fun HomePage(modifier: Modifier = Modifier,
     }
 
     GoogleMap(
-        modifier = modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
         cameraPositionState = camPosState,
         properties = MapProperties(isMyLocationEnabled = hasLocationPermission),
         uiSettings = MapUiSettings(myLocationButtonEnabled = true),

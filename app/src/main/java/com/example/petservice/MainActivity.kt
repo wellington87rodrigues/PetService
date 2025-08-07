@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -32,10 +33,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.petservice.db.fb.FBDatabase
 import com.example.petservice.model.MainViewModel
+import com.example.petservice.model.MainViewModelFactory
+import com.example.petservice.model.Service
 import com.example.petservice.ui.ServiceDialog
 import com.example.petservice.ui.nav.BottomNavBar
 import com.example.petservice.ui.nav.BottomNavItem
@@ -51,13 +56,21 @@ import com.google.firebase.auth.auth
 @OptIn(ExperimentalMaterial3Api::class)
 class MainActivity : ComponentActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
+
         setContent {
+            val fbDB = remember { FBDatabase() }
+            val viewModel: MainViewModel = viewModel(
+                factory = MainViewModelFactory(fbDB)
+            )
             val navController = rememberNavController()
-            val viewModel: MainViewModel by viewModels()
+
             var showDialog by remember { mutableStateOf(false) }
             var currentLatLng by remember { mutableStateOf<LatLng?>(null) }
             val context = LocalContext.current
@@ -73,32 +86,43 @@ class MainActivity : ComponentActivity() {
                         currentLatLng = latLng
                     }
                 } else {
-                    Toast.makeText(context, "Permissão de localização negada.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Permissão de localização negada.", Toast.LENGTH_SHORT)
+                        .show()
                 }
             }
+
             PetServiceTheme {
-                if (showDialog) { ServiceDialog(
-                    onDismiss = {
-                        showDialog = false
-                        currentLatLng = null
+                if (showDialog) {
+                    ServiceDialog(
+                        onDismiss = {
+                            showDialog = false
+                            currentLatLng = null
                         },
                         onConfirm = { description, serviceType, location ->
                             if (description.isNotBlank()) {
-                                viewModel.add(description, serviceType, location)
+                                viewModel.add(description, listOf(serviceType), location, "Em aberto")
                                 Toast.makeText(context, "Serviço adicionado!", Toast.LENGTH_SHORT).show()
                             } else {
-                                Toast.makeText(context, "Descrição do serviço não pode ser vazia.", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    context,
+                                    "Descrição do serviço não pode ser vazia.",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
                             showDialog = false
                             currentLatLng = null
                         },
                         onGetLocationClick = {
                             when {
-                                ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED -> {
+                                ContextCompat.checkSelfPermission(
+                                    context,
+                                    Manifest.permission.ACCESS_FINE_LOCATION
+                                ) == PackageManager.PERMISSION_GRANTED -> {
                                     getLastLocation(context) { latLng ->
                                         currentLatLng = latLng
                                     }
                                 }
+
                                 else -> {
                                     requestLocationPermissionLauncher.launch(
                                         arrayOf(
@@ -112,38 +136,40 @@ class MainActivity : ComponentActivity() {
                         currentLocation = currentLatLng
                     )
                 }
+                // Após fechar o diálogo, executa a lógica pesada
+
                 Scaffold(
-                        topBar = {
-                            TopAppBar(
-                                title = { Text("Bem-vindo/a!") },
-                                actions = {
-                                    IconButton( onClick = {
-                                        Firebase.auth.signOut()
-                                    } ) {
-                                        Icon(
-                                            imageVector =
-                                                Icons.AutoMirrored.Filled.ExitToApp,
-                                            contentDescription = "Localized description"
-                                        )
-                                    }
-                                }
-                            )
-                        },
-                        bottomBar = {
-                            val items = listOf(
-                                BottomNavItem.HomeButton,
-                                BottomNavItem.ListButton,
-                                BottomNavItem.MapButton,
-                            )
-                            BottomNavBar(navController = navController, items)
-                        },
-                        floatingActionButton = {
-                            if(showButton) {
-                                FloatingActionButton(onClick = { showDialog = true }) {
-                                    Icon(Icons.Default.Add, contentDescription = "Adicionar")
+                    topBar = {
+                        TopAppBar(
+                            title = { Text("Bem-vindo/a!") },
+                            actions = {
+                                IconButton(onClick = {
+                                    Firebase.auth.signOut()
+                                }) {
+                                    Icon(
+                                        imageVector =
+                                            Icons.AutoMirrored.Filled.ExitToApp,
+                                        contentDescription = "Localized description"
+                                    )
                                 }
                             }
+                        )
+                    },
+                    bottomBar = {
+                        val items = listOf(
+                            BottomNavItem.HomeButton,
+                            BottomNavItem.ListButton,
+                            BottomNavItem.MapButton,
+                        )
+                        BottomNavBar(navController = navController, items)
+                    },
+                    floatingActionButton = {
+                        if (showButton) {
+                            FloatingActionButton(onClick = { showDialog = true }) {
+                                Icon(Icons.Default.Add, contentDescription = "Adicionar")
+                            }
                         }
+                    }
                 ) { innerPadding ->
                     Box(modifier = Modifier.padding(innerPadding)) {
                         MainNavHost(
@@ -153,6 +179,7 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
+
         }
     }
 
@@ -163,15 +190,25 @@ class MainActivity : ComponentActivity() {
                 if (location != null) {
                     val latLng = LatLng(location.latitude, location.longitude)
                     onLocationResult(latLng)
-                    Toast.makeText(context, "Localização obtida!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Localização obtida!", Toast.LENGTH_SHORT)
+                        .show()
                 } else {
                     onLocationResult(null)
-                    Toast.makeText(context, "Não foi possível obter a localização atual.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        context,
+                        "Não foi possível obter a localização atual.",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
             .addOnFailureListener { e ->
                 onLocationResult(null)
-                Toast.makeText(context, "Erro ao obter localização: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    context,
+                    "Erro ao obter localização: ${e.message}",
+                    Toast.LENGTH_LONG
+                ).show()
             }
     }
+
 }

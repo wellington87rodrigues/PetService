@@ -1,6 +1,7 @@
 package com.example.petservice.ui.nav
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocationOn
@@ -23,7 +24,7 @@ sealed class BottomNavItem(
     data object HomeButton :
         BottomNavItem("Início", Icons.Default.Home, Route.Home)
     data object ListButton :
-        BottomNavItem("Favoritos", Icons.Default.Favorite, Route.List)
+        BottomNavItem("Solicitacões", Icons.Default.CheckCircle, Route.List)
     data object MapButton :
         BottomNavItem("Mapa", Icons.Default.LocationOn, Route.Map)
 }
