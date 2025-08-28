@@ -39,7 +39,13 @@ class RequestsRepository {
     fun listenOpen(onChanged: (List<Service>) -> Unit) =
         col.whereEqualTo("status", ServiceStatus.OPEN)
             .orderBy("openedAt", Query.Direction.DESCENDING)
-            .addSnapshotListener { snap, _ ->
+            .addSnapshotListener { snap, e ->
+                if (e != null) {
+                    android.util.Log.e("FB", "listenOpen failed", e)
+                    onChanged(emptyList())
+                    return@addSnapshotListener
+                }
+
                 onChanged(snap?.documents?.map { d ->
                     val lat = d.getDouble("lat"); val lng = d.getDouble("lng")
                     Service(
@@ -62,7 +68,12 @@ class RequestsRepository {
         col.whereEqualTo("solicitanteId", uid)
             .whereIn("status", listOf(ServiceStatus.OPEN, ServiceStatus.ACCEPTED))
             .orderBy("openedAt", Query.Direction.DESCENDING)
-            .addSnapshotListener { snap, _ ->
+            .addSnapshotListener { snap, e ->
+                if (e != null) {
+                    android.util.Log.e("FB", "listenOpen failed", e)
+                    onChanged(emptyList())
+                    return@addSnapshotListener
+                }
                 onChanged(snap?.documents?.map { d ->
                     val lat = d.getDouble("lat"); val lng = d.getDouble("lng")
                     Service(
@@ -83,7 +94,12 @@ class RequestsRepository {
         col.whereEqualTo("atendenteId", uid)
             .whereEqualTo("status", ServiceStatus.ACCEPTED)
             .orderBy("acceptedAt", Query.Direction.DESCENDING)
-            .addSnapshotListener { snap, _ ->
+            .addSnapshotListener { snap, e ->
+                if (e != null) {
+                    android.util.Log.e("FB", "listenOpen failed", e)
+                    onChanged(emptyList())
+                    return@addSnapshotListener
+                }
                 onChanged(snap?.documents?.map { d ->
                     val lat = d.getDouble("lat"); val lng = d.getDouble("lng")
                     Service(
