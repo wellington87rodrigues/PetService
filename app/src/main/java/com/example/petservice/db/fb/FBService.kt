@@ -13,6 +13,10 @@ class FBService {
     var status: String? = null
     var solicitanteId: String? = null
     var atendenteId: String? = null
+    // (opcional) para histórico
+    var openedAt: Long? = null
+    var acceptedAt: Long? = null
+    var completedAt: Long? = null
 
     fun toService(): Service {
         val latLng = if (lat != null && lng != null) LatLng(lat!!, lng!!) else null
@@ -23,7 +27,12 @@ class FBService {
             location = latLng,
             status = status ?: "em_aberto",
             solicitanteId = solicitanteId ?: "",
-            atendenteId = atendenteId
+            atendenteId = atendenteId,
+            openedAt = openedAt,
+            acceptedAt = acceptedAt,
+            completedAt = completedAt
+
+
         )
     }
 }
@@ -38,5 +47,8 @@ fun Service.toFBService(): FBService {
     fb.status = this.status
     fb.solicitanteId = this.solicitanteId
     fb.atendenteId = this.atendenteId
+    fb.openedAt = this.openedAt
+    fb.acceptedAt = this.acceptedAt
+    fb.completedAt = this.completedAt
     return fb
 }

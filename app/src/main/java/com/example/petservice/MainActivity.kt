@@ -40,6 +40,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.petservice.db.fb.FBDatabase
 import com.example.petservice.model.MainViewModel
 import com.example.petservice.model.MainViewModelFactory
+import com.example.petservice.model.RequestsViewModel
 import com.example.petservice.model.Service
 import com.example.petservice.ui.ServiceDialog
 import com.example.petservice.ui.nav.BottomNavBar
@@ -71,6 +72,8 @@ class MainActivity : ComponentActivity() {
             )
             val navController = rememberNavController()
 
+
+            val requestsVM: RequestsViewModel = viewModel()
             var showDialog by remember { mutableStateOf(false) }
             var currentLatLng by remember { mutableStateOf<LatLng?>(null) }
             val context = LocalContext.current
@@ -98,9 +101,16 @@ class MainActivity : ComponentActivity() {
                             showDialog = false
                             currentLatLng = null
                         },
-                        onConfirm = { description, serviceType, location ->
-                            if (description.isNotBlank()) {
-                                viewModel.add(description, listOf(serviceType), location, "Em aberto")
+                        onConfirm = { descricaoDigitada, tipoSelecionado, location ->
+                            if (descricaoDigitada.isNotBlank()) {
+
+                                requestsVM.createRequest(
+                                    description = descricaoDigitada,
+                                    types = listOf(tipoSelecionado), // ou sua lista
+                                    location = location // o LatLng que você já capturou
+                                )
+
+//                                viewModel.add(description, listOf(serviceType), location, "Em aberto")
                                 Toast.makeText(context, "Serviço adicionado!", Toast.LENGTH_SHORT).show()
                             } else {
                                 Toast.makeText(

@@ -73,4 +73,16 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+
+
+        implementation(platform("com.google.firebase:firebase-bom:33.4.0"))
+        implementation("com.google.firebase:firebase-auth-ktx")
+        implementation("com.google.firebase:firebase-firestore-ktx")
+        implementation("com.google.android.gms:play-services-maps:19.0.0")
+        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
+        implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.6")
+        implementation("androidx.activity:activity-compose:1.9.2")
+        implementation("androidx.compose.material3:material3:1.3.0")
+
 }

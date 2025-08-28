@@ -14,7 +14,7 @@ fun MainNavHost(navController: NavHostController, viewModel: MainViewModel) {
 
     NavHost(navController, startDestination = Route.Home) {
         composable<Route.Home> { HomePage(viewModel) }
-        composable<Route.List> { ListPage(viewModel) }
+        composable<Route.List> { ListPage() }
         composable<Route.Map> { MapPage(viewModel) }
     }
 }

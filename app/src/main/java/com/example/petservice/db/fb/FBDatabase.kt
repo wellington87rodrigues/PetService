@@ -76,11 +76,21 @@ class FBDatabase {
     fun remove(service: FBService) {
         if (auth.currentUser == null)
             throw RuntimeException("User not logged in!")
-        if (service.serviceTypes == null || service.serviceTypes!!.isEmpty())
-            throw RuntimeException("Tipo Servico with null or empty name!")
+
+
+        require(!service.id.isNullOrBlank()) { "Service sem id" }
         val uid = auth.currentUser!!.uid
-        val tiposString = service.serviceTypes?.joinToString(", ") ?: "Servico Padrão"
         db.collection("users").document(uid).collection("services")
-            .document(tiposString!!).delete()
+            .document(service.id!!)   // <- usa o id real do Firestore
+            .delete()
+
+
+
+//        if (service.serviceTypes == null || service.serviceTypes!!.isEmpty())
+//            throw RuntimeException("Tipo Servico with null or empty name!")
+//        val uid = auth.currentUser!!.uid
+//        val tiposString = service.serviceTypes?.joinToString(", ") ?: "Servico Padrão"
+//        db.collection("users").document(uid).collection("services")
+//            .document(tiposString!!).delete()
     }
 }

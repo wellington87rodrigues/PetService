@@ -58,22 +58,6 @@ class MainViewModel(private val db: FBDatabase) : ViewModel(),
 
     }
 
-//    private val _services = getServices().toMutableStateList()
-//    val services
-//        get() = _services.toList()
-//
-//    fun remove(service: Service) {
-//        _services.remove(service)
-//    }
-//
-//    fun add(descricao: String, serviceType: String, location: LatLng?) {
-//        val validServiceTypes = listOf("Adoção", "Resgate")
-//        if (serviceType in validServiceTypes) {
-//            _services.add(Service(descricao = descricao, serviceTypes = listOf(serviceType), location = location))
-//        }
-//    }
-//}
-
 private fun getServices() = List(2) { i ->
     val serviceTypes = if (i % 2 == 0) listOf("Adoção") else listOf("Resgate")
     Service(
