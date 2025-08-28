@@ -75,51 +75,51 @@ fun ListPageAntiga(
     }
 }
 
-@Composable
-fun ServiceItemAntigo(
-    service: Service,
-    onClick: () -> Unit,
-    onClose: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-            .clickable { onClick() },
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            Icons.Rounded.FavoriteBorder,
-            contentDescription = ""
-        )
-        Spacer(modifier = Modifier.size(12.dp))
-        Column(modifier = modifier.weight(1f)) {
-            Text(
-                modifier = Modifier,
-                text = "Tipo: ${service.serviceTypes.joinToString(" / ")}",
-                fontSize = 24.sp
-            )
-            Text(
-                modifier = Modifier,
-                text = service.descricao,
-                fontSize = 20.sp,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
-            )
-            if (service.location != null) {
-                Text(
-                    modifier = Modifier,
-                    text = "Localização: ${service.location.latitude}:${service.location.longitude}",
-                    fontSize = 16.sp,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                )
-            }
-        }
-        IconButton(onClick = onClose) {
-            Icon(Icons.Filled.Close, contentDescription = "Close")
-        }
-    }
-}
+//@Composable
+//fun ServiceItemAntigo(
+//    service: Service,
+//    onClick: () -> Unit,
+//    onClose: () -> Unit,
+//    modifier: Modifier = Modifier
+//) {
+//    Row(
+//        modifier = modifier
+//            .fillMaxWidth()
+//            .padding(8.dp)
+//            .clickable { onClick() },
+//        verticalAlignment = Alignment.CenterVertically
+//    ) {
+//        Icon(
+//            Icons.Rounded.FavoriteBorder,
+//            contentDescription = ""
+//        )
+//        Spacer(modifier = Modifier.size(12.dp))
+//        Column(modifier = modifier.weight(1f)) {
+//            Text(
+//                modifier = Modifier,
+//                text = "Tipo: ${service.serviceTypes.joinToString(" / ")}",
+//                fontSize = 24.sp
+//            )
+//            Text(
+//                modifier = Modifier,
+//                text = service.descricao,
+//                fontSize = 20.sp,
+//                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+//            )
+//            if (service.location != null) {
+//                Text(
+//                    modifier = Modifier,
+//                    text = "Localização: ${service.location.latitude}:${service.location.longitude}",
+//                    fontSize = 16.sp,
+//                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+//                )
+//            }
+//        }
+//        IconButton(onClick = onClose) {
+//            Icon(Icons.Filled.Close, contentDescription = "Close")
+//        }
+//    }
+//}
 
 @Composable
 fun ServiceCardAntigo(

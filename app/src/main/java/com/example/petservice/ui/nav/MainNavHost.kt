@@ -7,6 +7,7 @@ import androidx.navigation.compose.composable
 import com.example.petservice.model.MainViewModel
 import com.example.petservice.ui.Page.HomePage
 import com.example.petservice.ui.Page.ListPage
+import com.example.petservice.ui.Page.ListPageAntiga
 import com.example.petservice.ui.Page.MapPage
 
 @Composable

@@ -1,46 +1,25 @@
 package com.example.petservice.ui.Page
 
 import android.annotation.SuppressLint
-import android.app.Activity
-import android.widget.Toast
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.rounded.FavoriteBorder
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.example.petservice.model.MainViewModel
-import com.example.petservice.model.Service
-
-
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import com.example.petservice.model.ServiceStatus
-import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.petservice.model.RequestsViewModel
+import com.example.petservice.model.Service
+import com.example.petservice.model.ServiceStatus
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
-import com.example.petservice.model.RequestsViewModel
 
-
+private enum class RequestsFilter { OPEN, ACCEPTED_BY_ME, MINE }
 
 @Composable
 fun ServiceCard(
@@ -51,6 +30,7 @@ fun ServiceCard(
     onCancel: (String) -> Unit = {}
 ) {
     val isMine = (item.solicitanteId == currentUid)
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -62,10 +42,12 @@ fun ServiceCard(
             Text(item.descricao, style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(4.dp))
             Text("Tipos: ${item.serviceTypes.joinToString()}")
+
             item.location?.let { ll ->
                 Spacer(Modifier.height(4.dp))
                 Text("Local: ${"%.5f".format(ll.latitude)}, ${"%.5f".format(ll.longitude)}")
             }
+
             Spacer(Modifier.height(12.dp))
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -74,7 +56,6 @@ fun ServiceCard(
                         if (!isMine) {
                             Button(onClick = { onAccept(item.id) }) { Text("Aceitar") }
                         } else {
-                            // Se for seu pedido e ainda OPEN, dá para cancelar
                             AssistChip(onClick = {}, label = { Text("Aguardando resgate") })
                             IconButton(onClick = { onCancel(item.id) }) {
                                 Icon(Icons.Filled.Close, contentDescription = "Cancelar")
@@ -88,66 +69,96 @@ fun ServiceCard(
                             AssistChip(onClick = {}, label = { Text("Em atendimento") })
                         }
                     }
-                    ServiceStatus.COMPLETED -> {
-                        AssistChip(onClick = {}, label = { Text("Concluído") })
-                    }
-                    ServiceStatus.CANCELED -> {
-                        AssistChip(onClick = {}, label = { Text("Cancelado") })
-                    }
+                    ServiceStatus.COMPLETED -> AssistChip(onClick = {}, label = { Text("Concluído") })
+                    ServiceStatus.CANCELED  -> AssistChip(onClick = {}, label = { Text("Cancelado") })
                 }
             }
         }
     }
 }
 
-
-
-
 @SuppressLint("ContextCastToActivity")
 @Composable
 fun ListPage() {
     val vm: RequestsViewModel = viewModel()
-    val open = vm.openRequests.collectAsState(initial = emptyList()).value
-    val mine = vm.myRequests.collectAsState(initial = emptyList()).value
-    val accepted = vm.acceptedByMe.collectAsState(initial = emptyList()).value
+
+    // Fluxos das listas
+    val open by vm.openRequests.collectAsState(initial = emptyList())
+    val mine by vm.myRequests.collectAsState(initial = emptyList())
+    val accepted by vm.acceptedByMe.collectAsState(initial = emptyList())
     val uid = Firebase.auth.currentUser?.uid
 
-    LazyColumn {
-        // Abertos
-        item { Text("Abertos", style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(12.dp)) }
-        items(open, key = { it.id }) { s: Service ->
-            ServiceCard(
-                item = s,
-                currentUid = uid,
-                onAccept = vm::acceptRequest,   // <-- aceitar
-                onComplete = {},                // não conclui aqui
-                onCancel = {}                   // quem abre não aparece aqui normalmente
-            )
+    // Filtro selecionado (sobrevive a rotação/volta da tela)
+    var selectedTab by rememberSaveable { mutableStateOf(RequestsFilter.OPEN) }
+
+    val tabs = listOf("Todos Chamados", "Para Resgatar", "Meus Pedidos")
+    val selectedIndex = when (selectedTab) {
+        RequestsFilter.OPEN -> 0
+        RequestsFilter.ACCEPTED_BY_ME -> 1
+        RequestsFilter.MINE -> 2
+    }
+
+    // Decide a lista corrente e a mensagem de vazio
+    val currentList: List<Service>
+    val emptyText: String
+    when (selectedTab) {
+        RequestsFilter.OPEN -> {
+            currentList = open
+            emptyText = "Não há solicitações abertas."
+        }
+        RequestsFilter.ACCEPTED_BY_ME -> {
+            currentList = accepted
+            emptyText = "Você não aceitou nenhuma solicitação."
+        }
+        RequestsFilter.MINE -> {
+            currentList = mine
+            emptyText = "Você ainda não abriu solicitações."
+        }
+    }
+
+    Column(Modifier.fillMaxSize()) {
+        // Top tabs (3 botões)
+        TabRow(selectedTabIndex = selectedIndex) {
+            tabs.forEachIndexed { i, label ->
+                Tab(
+                    selected = selectedIndex == i,
+                    onClick = {
+                        selectedTab = when (i) {
+                            0 -> RequestsFilter.OPEN
+                            1 -> RequestsFilter.ACCEPTED_BY_ME
+                            else -> RequestsFilter.MINE
+                        }
+                    },
+                    text = { Text(label) }
+                )
+            }
         }
 
-        // Aceitos por mim
-        item { Text("Aceitos por mim", style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(12.dp)) }
-        items(accepted, key = { it.id }) { s: Service ->
-            ServiceCard(
-                item = s,
-                currentUid = uid,
-                onAccept = {},
-                onComplete = vm::completeRequest, // <-- concluir
-                onCancel = {}                      // não cancela aqui
-            )
-        }
-
-        // Meus pedidos (posso cancelar se ainda OPEN)
-        item { Text("Meus pedidos", style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(12.dp)) }
-        items(mine, key = { it.id }) { s: Service ->
-            ServiceCard(
-                item = s,
-                currentUid = uid,
-                onAccept = {},
-                onComplete = {},
-                onCancel = vm::cancelRequest         // <-- cancelar (se for seu e estiver OPEN)
-            )
+        // Conteúdo por filtro
+        if (currentList.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(24.dp),
+                contentAlignment = Alignment.TopCenter
+            ) {
+                Text(emptyText, style = MaterialTheme.typography.bodyLarge)
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(vertical = 8.dp)
+            ) {
+                items(currentList, key = { it.id }) { s ->
+                    ServiceCard(
+                        item = s,
+                        currentUid = uid,
+                        onAccept = vm::acceptRequest,
+                        onComplete = vm::completeRequest,
+                        onCancel = vm::cancelRequest
+                    )
+                }
+            }
         }
     }
 }
-
